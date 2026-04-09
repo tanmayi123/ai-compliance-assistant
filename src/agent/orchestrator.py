@@ -43,7 +43,7 @@ def build_agent(retriever, memory):
         memory=memory,
         verbose=True,
         handle_parsing_errors=True,
-        max_iterations=5
+        max_iterations=10
     )
 
     return agent_executor
