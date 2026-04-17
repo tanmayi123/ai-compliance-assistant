@@ -482,7 +482,7 @@ with tab1:
                     lg_messages=st.session_state.lg_messages,
                 )
         except Exception as e:
-            pass
+            st.warning(f"⚠️ Chat history save failed: {e}")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 2: LAW UPDATES DASHBOARD
