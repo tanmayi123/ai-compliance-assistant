@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import random
 from datetime import datetime
 from dotenv import load_dotenv
 from pinecone import Pinecone
@@ -14,6 +15,12 @@ def _get_index():
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
     index_name = os.getenv("PINECONE_INDEX_NAME", "compliance-docs")
     return pc.Index(index_name)
+
+
+def _dummy_vector():
+    """Generate a non-zero dummy vector for Pinecone storage."""
+    v = [random.uniform(0.001, 0.01) for _ in range(1536)]
+    return v
 
 
 def save_conversation(user_email: str, messages: list, lg_messages: list, title: str = "") -> str:
@@ -50,7 +57,7 @@ def save_conversation(user_email: str, messages: list, lg_messages: list, title:
     }
 
     # Use a dummy vector (zeros) — we're using Pinecone purely as a key-value store here
-    dummy_vector = [0.0] * 1536
+    dummy_vector = _dummy_vector()
 
     index.upsert(
         vectors=[{
@@ -88,7 +95,7 @@ def update_conversation(conversation_id: str, messages: list, lg_messages: list)
     ])
     metadata["message_count"] = len(messages)
 
-    dummy_vector = [0.0] * 1536
+    dummy_vector = _dummy_vector()
     index.upsert(
         vectors=[{
             "id": conversation_id,
@@ -108,7 +115,7 @@ def load_conversations(user_email: str, limit: int = 30) -> list:
 
     try:
         results = index.query(
-            vector=[0.0] * 1536,
+            vector=_dummy_vector(),
             top_k=limit,
             namespace=CHAT_NAMESPACE,
             filter={"user_email": {"$eq": user_email}},
