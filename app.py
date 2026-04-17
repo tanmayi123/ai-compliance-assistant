@@ -61,6 +61,15 @@ if "calendar" not in st.session_state:
     st.session_state.calendar = []
     st.session_state.calendar_structured = []
 
+# ── User identity ──────────────────────────────────────────────────────────────
+user_email = "local@user.com"
+try:
+    user_info = st.experimental_user
+    if user_info and hasattr(user_info, "email") and user_info.email:
+        user_email = user_info.email
+except Exception:
+    pass
+
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
@@ -106,15 +115,6 @@ with st.sidebar:
         help="Rewrites the answer in simple, plain language"
     )
     st.divider()
-
-    # ── Get user email ─────────────────────────────────────────────────────────
-    user_email = "local@user.com"  # fallback for local dev
-    try:
-        user_info = st.experimental_user
-        if user_info and hasattr(user_info, "email") and user_info.email:
-            user_email = user_info.email
-    except Exception:
-        pass
 
     # ── New Chat button ────────────────────────────────────────────────────────
     if st.button("＋ New Chat", use_container_width=True):
@@ -468,24 +468,21 @@ with tab1:
         # ── Save / update conversation in Pinecone ─────────────────────────────
         try:
             if not st.session_state.conversation_id:
-                # First message — create new conversation
                 conv_id = save_conversation(
                     user_email=user_email,
                     messages=st.session_state.messages,
                     lg_messages=st.session_state.lg_messages,
                 )
                 st.session_state.conversation_id = conv_id
-                # Refresh sidebar history
-                st.session_state.chat_history_list = load_conversations(user_email, limit=30)
+                st.session_state.history_loaded = False  # force sidebar refresh
             else:
-                # Existing conversation — update it
                 update_conversation(
                     conversation_id=st.session_state.conversation_id,
                     messages=st.session_state.messages,
                     lg_messages=st.session_state.lg_messages,
                 )
         except Exception as e:
-            pass  # Don't break the app if history save fails
+            pass
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 2: LAW UPDATES DASHBOARD
