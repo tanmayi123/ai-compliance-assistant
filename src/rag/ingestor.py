@@ -1,19 +1,28 @@
+import os
 import tempfile
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
 
 load_dotenv()
 
 DOCS_DIR = Path("data/documents")
-VECTORSTORE_DIR = Path("data/vectorstore")
+
+
+def get_pinecone_store(embeddings):
+    """Initialize and return a PineconeVectorStore."""
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    index_name = os.getenv("PINECONE_INDEX_NAME", "compliance-docs")
+    index = pc.Index(index_name)
+    return PineconeVectorStore(index=index, embedding=embeddings)
 
 
 def ingest():
-    """Load all PDFs from data/documents/, chunk, embed and save to FAISS."""
+    """Load all PDFs from data/documents/, chunk, embed and upsert to Pinecone."""
 
     pdfs = list(DOCS_DIR.glob("*.pdf"))
     if not pdfs:
@@ -39,20 +48,18 @@ def ingest():
     chunks = splitter.split_documents(all_docs)
     print(f"[ingestor] Total chunks created: {len(chunks)}")
 
-    print("[ingestor] Embedding chunks and saving to FAISS ...")
+    print("[ingestor] Embedding and upserting to Pinecone ...")
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-    vectorstore = FAISS.from_documents(chunks, embeddings)
+    vectorstore = get_pinecone_store(embeddings)
+    vectorstore.add_documents(chunks)
 
-    VECTORSTORE_DIR.mkdir(parents=True, exist_ok=True)
-    vectorstore.save_local(str(VECTORSTORE_DIR))
-    print(f"[ingestor] Vectorstore saved to {VECTORSTORE_DIR}")
     print("[ingestor] Done!")
 
 
 def ingest_uploaded_file(uploaded_file) -> str:
     """
     Chunk and embed a single uploaded PDF file object (from Streamlit),
-    then merge it into the existing FAISS vectorstore.
+    then upsert it into Pinecone.
     Returns a status message.
     """
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -66,7 +73,6 @@ def ingest_uploaded_file(uploaded_file) -> str:
     loader = PyPDFLoader(tmp_path)
     docs = loader.load()
 
-    # Tag each chunk with the original filename as source metadata
     for doc in docs:
         doc.metadata["source"] = uploaded_file.name
 
@@ -77,21 +83,11 @@ def ingest_uploaded_file(uploaded_file) -> str:
     )
     chunks = splitter.split_documents(docs)
 
-    # ── Merge into existing vectorstore or create new one ─────────────────────
-    if VECTORSTORE_DIR.exists():
-        vectorstore = FAISS.load_local(
-            str(VECTORSTORE_DIR),
-            embeddings,
-            allow_dangerous_deserialization=True
-        )
-        vectorstore.add_documents(chunks)
-    else:
-        vectorstore = FAISS.from_documents(chunks, embeddings)
+    # ── Upsert into Pinecone ───────────────────────────────────────────────────
+    vectorstore = get_pinecone_store(embeddings)
+    vectorstore.add_documents(chunks)
 
-    VECTORSTORE_DIR.mkdir(parents=True, exist_ok=True)
-    vectorstore.save_local(str(VECTORSTORE_DIR))
-
-    return f"✅ '{uploaded_file.name}' ingested — {len(chunks)} chunks added to the knowledge base."
+    return f"✅ '{uploaded_file.name}' ingested — {len(chunks)} chunks added to Pinecone."
 
 
 if __name__ == "__main__":

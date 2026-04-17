@@ -1,25 +1,19 @@
-from pathlib import Path
+import os
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
 
 load_dotenv()
 
-VECTORSTORE_DIR = Path("data/vectorstore")
-
 
 def get_retriever(k: int = 4):
-    """Load FAISS vectorstore and return a retriever that fetches top-k chunks."""
-    if not VECTORSTORE_DIR.exists():
-        raise FileNotFoundError(
-            "Vectorstore not found. Please run the ingestor first:\n"
-            "  python -m src.rag.ingestor"
-        )
-
+    """Connect to Pinecone and return a retriever that fetches top-k chunks."""
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-    vectorstore = FAISS.load_local(
-        str(VECTORSTORE_DIR),
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
+
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    index_name = os.getenv("PINECONE_INDEX_NAME", "compliance-docs")
+    index = pc.Index(index_name)
+
+    vectorstore = PineconeVectorStore(index=index, embedding=embeddings)
     return vectorstore.as_retriever(search_kwargs={"k": k})
