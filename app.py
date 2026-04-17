@@ -474,7 +474,8 @@ with tab1:
                     lg_messages=st.session_state.lg_messages,
                 )
                 st.session_state.conversation_id = conv_id
-                st.session_state.history_loaded = False  # force sidebar refresh
+                st.session_state.history_loaded = False
+                st.rerun()
             else:
                 update_conversation(
                     conversation_id=st.session_state.conversation_id,
