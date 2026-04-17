@@ -305,6 +305,20 @@ with tab1:
 
     if user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
+
+        # ── Save conversation immediately on first user message ────────────────
+        if not st.session_state.conversation_id:
+            try:
+                conv_id = save_conversation(
+                    user_email=user_email,
+                    messages=st.session_state.messages,
+                    lg_messages=st.session_state.lg_messages,
+                )
+                st.session_state.conversation_id = conv_id
+                st.session_state.history_loaded = False
+            except Exception:
+                pass
+
         with st.chat_message("user"):
             st.markdown(user_input)
 
@@ -465,25 +479,16 @@ with tab1:
             ]
         st.session_state.messages.append(msg_entry)
 
-        # ── Save / update conversation in Pinecone ─────────────────────────────
+        # ── Update conversation with full response ─────────────────────────────
         try:
-            if not st.session_state.conversation_id:
-                conv_id = save_conversation(
-                    user_email=user_email,
-                    messages=st.session_state.messages,
-                    lg_messages=st.session_state.lg_messages,
-                )
-                st.session_state.conversation_id = conv_id
-                st.session_state.history_loaded = False
-                st.rerun()
-            else:
+            if st.session_state.conversation_id:
                 update_conversation(
                     conversation_id=st.session_state.conversation_id,
                     messages=st.session_state.messages,
                     lg_messages=st.session_state.lg_messages,
                 )
         except Exception as e:
-            st.warning(f"⚠️ Chat history save failed: {e}")
+            st.warning(f"⚠️ Chat history update failed: {e}")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 2: LAW UPDATES DASHBOARD
