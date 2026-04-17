@@ -1,0 +1,419 @@
+/* ═══════════════════════════════════════════════════════════
+   AI COMPLIANCE ASSISTANT — Custom Styles
+   Refined legal aesthetic: dark, authoritative, precise
+   Font: Cormorant Garamond (display) + DM Sans (body)
+═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ── CSS Variables ──────────────────────────────────────── */
+:root {
+    --bg-primary: #0e0e0f;
+    --bg-secondary: #161618;
+    --bg-card: #1c1c1f;
+    --bg-hover: #222226;
+    --accent: #c9a96e;
+    --accent-dim: rgba(201, 169, 110, 0.15);
+    --accent-border: rgba(201, 169, 110, 0.3);
+    --text-primary: #f5f1eb;
+    --text-secondary: #a8a29e;
+    --text-dim: #666360;
+    --border: rgba(255,255,255,0.08);
+    --border-accent: rgba(201, 169, 110, 0.3);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+/* ── Global reset ───────────────────────────────────────── */
+html, body, [data-testid="stApp"] {
+    background-color: var(--bg-primary) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    color: var(--text-primary) !important;
+}
+
+/* ── Hide Streamlit branding ────────────────────────────── */
+#MainMenu, footer, header { display: none !important; }
+[data-testid="stToolbar"] { display: none !important; }
+.stDeployButton { display: none !important; }
+
+/* ── Sidebar ────────────────────────────────────────────── */
+[data-testid="stSidebar"] {
+    background-color: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border) !important;
+    padding-top: 0 !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    padding: 0 !important;
+}
+
+/* Sidebar title */
+[data-testid="stSidebar"] h1 {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    color: var(--accent) !important;
+    padding: 24px 20px 4px 20px !important;
+    letter-spacing: 0.03em !important;
+}
+
+/* Sidebar caption/subtitle */
+[data-testid="stSidebar"] .stCaption {
+    color: var(--text-secondary) !important;
+    font-size: 0.75rem !important;
+    padding: 0 20px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+/* Sidebar list items */
+[data-testid="stSidebar"] .stMarkdown p {
+    color: var(--text-secondary) !important;
+    font-size: 0.88rem !important;
+    line-height: 2.2 !important;
+    padding: 0 20px !important;
+    letter-spacing: 0.02em !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown li {
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+    padding: 10px 0 !important;
+    list-style: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    margin: 0 !important;
+    letter-spacing: 0.02em !important;
+    transition: color 0.2s !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown li:hover {
+    color: var(--accent) !important;
+    cursor: pointer !important;
+}
+
+[data-testid="stSidebar"] hr {
+    border-color: var(--border) !important;
+    margin: 12px 0 !important;
+}
+
+/* ── Sidebar toggle (ELI5) ──────────────────────────────── */
+[data-testid="stSidebar"] .stToggle label {
+    color: var(--text-primary) !important;
+    font-size: 0.85rem !important;
+}
+
+[data-testid="stToggle"] > div {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 10px 16px !important;
+}
+
+/* Toggle switch active state */
+[data-testid="stToggle"] input:checked + div {
+    background-color: var(--accent) !important;
+}
+
+/* ── Sidebar button (Clear Chat) ────────────────────────── */
+[data-testid="stSidebar"] .stButton > button {
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.04em !important;
+    padding: 8px 16px !important;
+    width: 100% !important;
+    transition: all 0.2s ease !important;
+    margin: 0 !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    border-color: var(--accent-border) !important;
+    color: var(--accent) !important;
+    background: var(--accent-dim) !important;
+}
+
+/* ── Main content area ──────────────────────────────────── */
+.main .block-container {
+    background-color: var(--bg-primary) !important;
+    padding: 2rem 3rem !important;
+    max-width: 860px !important;
+}
+
+/* ── Page title ─────────────────────────────────────────── */
+.main h1 {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 2.2rem !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 4px !important;
+}
+
+.main .stCaption {
+    color: var(--text-secondary) !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+}
+
+/* ── Tabs ───────────────────────────────────────────────── */
+[data-testid="stTabs"] {
+    border-bottom: 1px solid var(--border) !important;
+    margin-bottom: 24px !important;
+}
+
+[data-testid="stTabs"] button {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    color: var(--text-secondary) !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    padding: 10px 20px !important;
+    border: none !important;
+    background: transparent !important;
+    transition: color 0.2s !important;
+}
+
+[data-testid="stTabs"] button:hover {
+    color: var(--text-primary) !important;
+}
+
+[data-testid="stTabs"] button[aria-selected="true"] {
+    color: var(--accent) !important;
+    border-bottom: 2px solid var(--accent) !important;
+    font-weight: 500 !important;
+}
+
+/* ── Chat messages ──────────────────────────────────────── */
+[data-testid="stChatMessage"] {
+    background: transparent !important;
+    border: none !important;
+    padding: 16px 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+[data-testid="stChatMessage"] .stMarkdown {
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+    line-height: 1.8 !important;
+}
+
+[data-testid="stChatMessage"] img {
+    border-radius: 50% !important;
+    border: 1px solid var(--border-accent) !important;
+}
+
+/* ── Chat input ─────────────────────────────────────────── */
+[data-testid="stChatInput"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-accent) !important;
+    border-radius: 50px !important;
+    padding: 4px 8px !important;
+    box-shadow: 0 0 0 0 transparent !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+[data-testid="stChatInput"]:focus-within {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim) !important;
+}
+
+[data-testid="stChatInput"] textarea {
+    background: transparent !important;
+    color: var(--text-primary) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.9rem !important;
+    border: none !important;
+    outline: none !important;
+    caret-color: var(--accent) !important;
+}
+
+[data-testid="stChatInput"] textarea::placeholder {
+    color: var(--text-dim) !important;
+}
+
+/* Send button */
+[data-testid="stChatInput"] button {
+    background: var(--accent) !important;
+    border-radius: 50% !important;
+    color: var(--bg-primary) !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    transition: opacity 0.2s !important;
+}
+
+[data-testid="stChatInput"] button:hover {
+    opacity: 0.85 !important;
+}
+
+/* ── Info / status boxes ────────────────────────────────── */
+[data-testid="stAlert"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+}
+
+[data-testid="stAlert"][data-baseweb="notification"] {
+    border-left: 3px solid var(--accent) !important;
+}
+
+/* ── Expanders (Sources, Debate) ────────────────────────── */
+[data-testid="stExpander"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    margin-top: 8px !important;
+}
+
+[data-testid="stExpander"] summary {
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.03em !important;
+    padding: 10px 14px !important;
+}
+
+[data-testid="stExpander"] summary:hover {
+    color: var(--accent) !important;
+}
+
+[data-testid="stExpander"] .stMarkdown {
+    font-size: 0.85rem !important;
+    color: var(--text-secondary) !important;
+    padding: 8px 14px !important;
+}
+
+/* ── Spinners ───────────────────────────────────────────── */
+[data-testid="stSpinner"] {
+    color: var(--accent) !important;
+}
+
+/* ── Divider ────────────────────────────────────────────── */
+hr {
+    border-color: var(--border) !important;
+    margin: 20px 0 !important;
+}
+
+/* ── Subheadings ────────────────────────────────────────── */
+.main h2, .main h3 {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.01em !important;
+}
+
+.main h2 { font-size: 1.5rem !important; }
+.main h3 { font-size: 1.2rem !important; }
+
+/* ── Compliance risk label ──────────────────────────────── */
+.main strong {
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
+}
+
+/* ── Plotly charts ──────────────────────────────────────── */
+[data-testid="stPlotlyChart"] {
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    border: 1px solid var(--border) !important;
+    background: var(--bg-card) !important;
+}
+
+/* ── Dataframe ──────────────────────────────────────────── */
+[data-testid="stDataFrame"] {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    overflow: hidden !important;
+}
+
+/* ── Warning / success messages ─────────────────────────── */
+[data-testid="stSuccess"] {
+    background: rgba(46, 204, 113, 0.08) !important;
+    border: 1px solid rgba(46, 204, 113, 0.2) !important;
+    border-radius: var(--radius-sm) !important;
+    color: #2ecc71 !important;
+    font-size: 0.82rem !important;
+}
+
+[data-testid="stWarning"] {
+    background: rgba(201, 169, 110, 0.08) !important;
+    border: 1px solid var(--accent-border) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--accent) !important;
+    font-size: 0.82rem !important;
+}
+
+/* ── Welcome state (empty chat) ─────────────────────────── */
+.welcome-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.welcome-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-accent);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+}
+
+.welcome-title {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.welcome-subtitle {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 380px;
+}
+
+/* ── Download button ────────────────────────────────────── */
+.main [data-testid="stDownloadButton"] button {
+    background: transparent !important;
+    border: 1px solid var(--border-accent) !important;
+    color: var(--accent) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    padding: 6px 14px !important;
+    margin-top: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.main [data-testid="stDownloadButton"] button:hover {
+    background: var(--accent-dim) !important;
+    border-color: var(--accent) !important;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+/* ── Smooth transitions globally ────────────────────────── */
+* { transition: background-color 0.15s ease, border-color 0.15s ease; }

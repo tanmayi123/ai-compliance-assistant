@@ -12,9 +12,32 @@ load_dotenv()
 
 DOCS_DIR = Path("data/documents")
 
+# ── Map PDF filenames to regulation labels ─────────────────────────────────────
+REGULATION_TAGS = {
+    "hipaa-simplification-201303.pdf": "hipaa",
+    "CELEX_32016R0679_EN_TXT.pdf": "gdpr",
+    "ccpa-proposed-regs.pdf": "ccpa",
+    "OJ_L_202401689_EN_TXT.pdf": "eu_ai_act",
+    "p126234.pdf": "finra",
+}
+
+# ── Fallback: detect regulation from filename keywords ────────────────────────
+def detect_regulation(filename: str) -> str:
+    name = filename.lower()
+    if "hipaa" in name:
+        return "hipaa"
+    elif "gdpr" in name or "celex" in name or "2016r0679" in name:
+        return "gdpr"
+    elif "ccpa" in name:
+        return "ccpa"
+    elif "ai_act" in name or "ai-act" in name or "202401689" in name:
+        return "eu_ai_act"
+    elif "finra" in name or "p126234" in name:
+        return "finra"
+    return "general"
+
 
 def get_pinecone_store(embeddings):
-    """Initialize and return a PineconeVectorStore."""
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
     index_name = os.getenv("PINECONE_INDEX_NAME", "compliance-docs")
     index = pc.Index(index_name)
@@ -22,8 +45,7 @@ def get_pinecone_store(embeddings):
 
 
 def ingest():
-    """Load all PDFs from data/documents/, chunk, embed and upsert to Pinecone."""
-
+    """Load all PDFs from data/documents/, tag with regulation, chunk, embed and upsert to Pinecone."""
     pdfs = list(DOCS_DIR.glob("*.pdf"))
     if not pdfs:
         print("[ingestor] No PDFs found in data/documents/")
@@ -33,9 +55,13 @@ def ingest():
 
     all_docs = []
     for pdf_path in pdfs:
-        print(f"[ingestor] Loading {pdf_path.name} ...")
+        regulation = REGULATION_TAGS.get(pdf_path.name, detect_regulation(pdf_path.name))
+        print(f"[ingestor] Loading {pdf_path.name} → regulation: {regulation}")
         loader = PyPDFLoader(str(pdf_path))
         docs = loader.load()
+        for doc in docs:
+            doc.metadata["regulation"] = regulation
+            doc.metadata["source"] = pdf_path.name
         all_docs.extend(docs)
 
     print(f"[ingestor] Total pages loaded: {len(all_docs)}")
@@ -52,29 +78,23 @@ def ingest():
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     vectorstore = get_pinecone_store(embeddings)
     vectorstore.add_documents(chunks)
-
     print("[ingestor] Done!")
 
 
 def ingest_uploaded_file(uploaded_file) -> str:
-    """
-    Chunk and embed a single uploaded PDF file object (from Streamlit),
-    then upsert it into Pinecone.
-    Returns a status message.
-    """
+    """Chunk, tag and upsert a single uploaded PDF into Pinecone."""
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    regulation = REGULATION_TAGS.get(uploaded_file.name, detect_regulation(uploaded_file.name))
 
-    # ── Save uploaded file to a temp location so PyPDFLoader can read it ──────
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(uploaded_file.read())
         tmp_path = tmp.name
 
-    # ── Load and chunk ─────────────────────────────────────────────────────────
     loader = PyPDFLoader(tmp_path)
     docs = loader.load()
-
     for doc in docs:
         doc.metadata["source"] = uploaded_file.name
+        doc.metadata["regulation"] = regulation
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -83,11 +103,10 @@ def ingest_uploaded_file(uploaded_file) -> str:
     )
     chunks = splitter.split_documents(docs)
 
-    # ── Upsert into Pinecone ───────────────────────────────────────────────────
     vectorstore = get_pinecone_store(embeddings)
     vectorstore.add_documents(chunks)
 
-    return f"✅ '{uploaded_file.name}' ingested — {len(chunks)} chunks added to Pinecone."
+    return f"✅ '{uploaded_file.name}' ingested as `{regulation}` — {len(chunks)} chunks added to Pinecone."
 
 
 if __name__ == "__main__":

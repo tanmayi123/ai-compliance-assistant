@@ -7,6 +7,7 @@ from langchain.tools.retriever import create_retriever_tool
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 from langchain_community.tools.tavily_search import TavilySearchResults
+from src.agent.supervisor import run_supervisor, SPECIALISTS
 
 load_dotenv()
 
