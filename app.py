@@ -13,6 +13,11 @@ from src.rag.ingestor import ingest_uploaded_file
 from src.tools.law_updates import fetch_law_updates
 from src.tools.compliance_intelligence import fetch_penalty_data, fetch_calendar_data, PENALTY_TOPICS
 from src.agent.debate_graph import run_debate
+from src.memory.chat_history import (
+    save_conversation, update_conversation,
+    load_conversations, load_conversation_messages,
+    delete_conversation, group_by_date
+)
 
 load_dotenv()
 
@@ -75,11 +80,75 @@ with st.sidebar:
     )
     st.divider()
 
-    if st.button("🗑️ Clear Chat", use_container_width=True):
+    # ── Get user email ─────────────────────────────────────────────────────────
+    user_email = "local@user.com"  # fallback for local dev
+    try:
+        user_info = st.experimental_user
+        if user_info and hasattr(user_info, "email") and user_info.email:
+            user_email = user_info.email
+    except Exception:
+        pass
+
+    # ── New Chat button ────────────────────────────────────────────────────────
+    if st.button("＋ New Chat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.lg_messages = []
+        st.session_state.conversation_id = ""
+        st.session_state.history_loaded = False
         st.rerun()
 
+    st.divider()
+
+    # ── Chat History ───────────────────────────────────────────────────────────
+    st.markdown("""
+<div style='font-size:0.68rem; color:#666360; text-transform:uppercase;
+     letter-spacing:0.1em; padding: 4px 4px 8px 4px;'>Chat History</div>
+""", unsafe_allow_html=True)
+
+    # Load history once per session
+    if not st.session_state.history_loaded:
+        st.session_state.chat_history_list = load_conversations(user_email, limit=30)
+        st.session_state.history_loaded = True
+
+    if st.session_state.chat_history_list:
+        grouped = group_by_date(st.session_state.chat_history_list)
+        for group_label, convs in grouped.items():
+            with st.expander(group_label, expanded=(group_label == "Today")):
+                for conv in convs:
+                    col1, col2 = st.columns([5, 1])
+                    with col1:
+                        if st.button(
+                            conv["title"],
+                            key=f"hist_{conv['id']}",
+                            use_container_width=True,
+                            help=f"{conv['message_count']} messages"
+                        ):
+                            # Restore conversation
+                            msgs, lg_raw = load_conversation_messages(conv["id"])
+                            if msgs:
+                                st.session_state.messages = msgs
+                                # Reconstruct lg_messages as AIMessage/HumanMessage
+                                restored_lg = []
+                                for m in lg_raw:
+                                    if m["type"] == "HumanMessage":
+                                        restored_lg.append(HumanMessage(content=m["content"]))
+                                    elif m["type"] == "AIMessage":
+                                        restored_lg.append(AIMessage(content=m["content"]))
+                                st.session_state.lg_messages = restored_lg
+                                st.session_state.conversation_id = conv["id"]
+                                st.rerun()
+                    with col2:
+                        if st.button("✕", key=f"del_{conv['id']}", help="Delete"):
+                            delete_conversation(conv["id"])
+                            st.session_state.chat_history_list = [
+                                c for c in st.session_state.chat_history_list
+                                if c["id"] != conv["id"]
+                            ]
+                            st.rerun()
+    else:
+        st.caption("No past conversations yet.")
+
+    st.divider()
     st.caption("⚠️ This tool provides informational guidance only, not legal advice.")
 
 # ── Session state ──────────────────────────────────────────────────────────────
@@ -88,6 +157,15 @@ if "messages" not in st.session_state:
 
 if "lg_messages" not in st.session_state:
     st.session_state.lg_messages = []
+
+if "conversation_id" not in st.session_state:
+    st.session_state.conversation_id = ""
+
+if "chat_history_list" not in st.session_state:
+    st.session_state.chat_history_list = []
+
+if "history_loaded" not in st.session_state:
+    st.session_state.history_loaded = False
 
 if "law_updates" not in st.session_state:
     st.session_state.law_updates = []
@@ -386,6 +464,28 @@ with tab1:
                 for doc in citation_docs
             ]
         st.session_state.messages.append(msg_entry)
+
+        # ── Save / update conversation in Pinecone ─────────────────────────────
+        try:
+            if not st.session_state.conversation_id:
+                # First message — create new conversation
+                conv_id = save_conversation(
+                    user_email=user_email,
+                    messages=st.session_state.messages,
+                    lg_messages=st.session_state.lg_messages,
+                )
+                st.session_state.conversation_id = conv_id
+                # Refresh sidebar history
+                st.session_state.chat_history_list = load_conversations(user_email, limit=30)
+            else:
+                # Existing conversation — update it
+                update_conversation(
+                    conversation_id=st.session_state.conversation_id,
+                    messages=st.session_state.messages,
+                    lg_messages=st.session_state.lg_messages,
+                )
+        except Exception as e:
+            pass  # Don't break the app if history save fails
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 2: LAW UPDATES DASHBOARD
