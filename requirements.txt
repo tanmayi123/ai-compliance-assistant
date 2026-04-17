@@ -10,8 +10,8 @@ tiktoken==0.8.0
 pypdf==4.3.1
 
 # Pinecone
-langchain-pinecone
-pinecone-client>=3.0.0
+langchain-pinecone==0.2.0
+pinecone==5.4.2
 
 # Agent web search tool
 tavily-python==0.5.0
