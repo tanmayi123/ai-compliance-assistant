@@ -34,6 +34,33 @@ def load_agent(_retriever, _memory):
 st.set_page_config(page_title="AI Compliance Assistant", page_icon="⚖️", layout="centered")
 load_styles()
 
+# ── Session state ──────────────────────────────────────────────────────────────
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "lg_messages" not in st.session_state:
+    st.session_state.lg_messages = []
+
+if "conversation_id" not in st.session_state:
+    st.session_state.conversation_id = ""
+
+if "chat_history_list" not in st.session_state:
+    st.session_state.chat_history_list = []
+
+if "history_loaded" not in st.session_state:
+    st.session_state.history_loaded = False
+
+if "law_updates" not in st.session_state:
+    st.session_state.law_updates = []
+
+if "penalties" not in st.session_state:
+    st.session_state.penalties = []
+    st.session_state.penalties_structured = []
+
+if "calendar" not in st.session_state:
+    st.session_state.calendar = []
+    st.session_state.calendar_structured = []
+
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
@@ -150,33 +177,6 @@ with st.sidebar:
 
     st.divider()
     st.caption("⚠️ This tool provides informational guidance only, not legal advice.")
-
-# ── Session state ──────────────────────────────────────────────────────────────
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "lg_messages" not in st.session_state:
-    st.session_state.lg_messages = []
-
-if "conversation_id" not in st.session_state:
-    st.session_state.conversation_id = ""
-
-if "chat_history_list" not in st.session_state:
-    st.session_state.chat_history_list = []
-
-if "history_loaded" not in st.session_state:
-    st.session_state.history_loaded = False
-
-if "law_updates" not in st.session_state:
-    st.session_state.law_updates = []
-
-if "penalties" not in st.session_state:
-    st.session_state.penalties = []
-    st.session_state.penalties_structured = []
-
-if "calendar" not in st.session_state:
-    st.session_state.calendar = []
-    st.session_state.calendar_structured = []
 
 # ── Load agent ─────────────────────────────────────────────────────────────────
 try:
