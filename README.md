@@ -189,6 +189,11 @@ Go to **Settings → Sharing** → set to **Private** → add allowed email addr
 
 ---
 
+This project is submitted by Group 5 
+Tanmayi 
+Novia
+Sushmitha
+
 ## Disclaimer
 
 This tool provides informational guidance only and does not constitute legal advice. Always consult a qualified legal or compliance professional for guidance specific to your situation.
