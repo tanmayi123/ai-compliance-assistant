@@ -188,7 +188,7 @@ except Exception as e:
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 def get_risk_level(response_text: str) -> str:
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
     prompt = f"""Classify the compliance risk level of this answer as LOW, MEDIUM, or HIGH.
 Answer with only one word.
 
@@ -204,7 +204,7 @@ Response: {response_text}
 
 
 def simplify_response(response_text: str) -> str:
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
     prompt = f"""Rewrite this compliance answer in simple plain language for a non-expert.
 
 Original: {response_text}

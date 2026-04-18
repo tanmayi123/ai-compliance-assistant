@@ -13,8 +13,11 @@ class DebateState(TypedDict):
     final_answer: str
 
 
-# ── LLM ────────────────────────────────────────────────────────────────────────
+# ── LLMs ───────────────────────────────────────────────────────────────────────
+# gpt-4o-mini for strict/lenient agents (fast, cost-efficient)
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# gpt-4o for synthesizer (higher stakes — balancing two arguments requires more reasoning)
+llm_synthesizer = ChatOpenAI(model="gpt-4o", temperature=0)
 
 
 # ── Node 1: Strict Agent ───────────────────────────────────────────────────────
@@ -74,7 +77,7 @@ Lenient interpretation:
 
 Synthesize both perspectives into a balanced final answer with a clear recommendation.""")
     ]
-    response = llm.invoke(messages)
+    response = llm_synthesizer.invoke(messages)
     return {**state, "final_answer": response.content}
 
 
